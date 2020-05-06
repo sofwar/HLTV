@@ -232,9 +232,9 @@ export const getMatch = (config: HLTVConfig) => async ({
   }
 
   let streams: Stream[] = toArray($('.stream-box-embed'))
-    .filter(hasChild('.flagAlign'))
+    .filter(hasChild('.stream-flag'))
     .map(streamEl => ({
-      name: streamEl.find('.flagAlign').text(),
+      name: streamEl.text(),
       link: streamEl.attr('data-stream-embed')!,
       viewers: Number(streamEl.find('.viewers').text())
     }))
