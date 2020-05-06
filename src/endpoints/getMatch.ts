@@ -236,7 +236,7 @@ export const getMatch = (config: HLTVConfig) => async ({
     .map(streamEl => ({
       name: streamEl.text(),
       link: streamEl.attr('data-stream-embed')!,
-      viewers: Number(streamEl.find('.viewers').text())
+      viewers: Number(streamEl.parent().find('.viewers.left-right-padding').text())
     }))
 
   if ($('.stream-box.hltv-live').length !== 0) {
