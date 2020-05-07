@@ -10,7 +10,7 @@ export type ConnectToScorebotParams = {
     onLogUpdate?: (data: LogUpdate, done: () => void) => any
     onFullLogUpdate?: (data: unknown, done: () => void) => any
     onScoreUpdate?: (data: unknown, done: () => void) => any
-    onConnect?: () => any
+    onConnect?: (init: boolean) => any
     onDisconnect?: () => any
 }
 
@@ -28,6 +28,8 @@ export const connectToScorebot = (config: HLTVConfig) => ({
             const scoreboardElement = $('#scoreboardElement');
 
             if (!scoreboardElement.length) {
+                onConnect(false)
+
                 return
             }
 
@@ -51,7 +53,7 @@ export const connectToScorebot = (config: HLTVConfig) => ({
                 const done = () => socket.close()
 
                 if (onConnect) {
-                    onConnect()
+                    onConnect(true)
                 }
 
                 socket.emit('readyForMatch', initObject)
