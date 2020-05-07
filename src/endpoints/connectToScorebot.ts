@@ -10,9 +10,10 @@ export type ConnectToScorebotParams = {
     onLogUpdate?: (data: LogUpdate, done: () => void) => any
     onFullLogUpdate?: (data: unknown, done: () => void) => any
     onScoreUpdate?: (data: unknown, done: () => void) => any
-    onConnect?: (init: boolean) => any
+    onConnect?: (init: boolean, typeSocket: string) => any
     onDisconnect?: () => any
 }
+
 
 export const connectToScorebot = (config: HLTVConfig) => ({
     id,
@@ -29,7 +30,7 @@ export const connectToScorebot = (config: HLTVConfig) => ({
 
             if (!scoreboardElement.length) {
                 if (onConnect) {
-                    onConnect(false)
+                    onConnect(false, 'all')
                 }
 
                 return
@@ -55,7 +56,7 @@ export const connectToScorebot = (config: HLTVConfig) => ({
                 const done = () => socket.close()
 
                 if (onConnect) {
-                    onConnect(true)
+                    onConnect(true, 'match')
                 }
 
                 socket.emit('readyForMatch', initObject)
@@ -69,12 +70,6 @@ export const connectToScorebot = (config: HLTVConfig) => ({
                 socket.on('log', data => {
                     if (onLogUpdate) {
                         onLogUpdate(JSON.parse(data), done)
-                    }
-                })
-
-                socket.on('score', data => {
-                    if (onScoreUpdate) {
-                        onScoreUpdate(JSON.parse(data), done)
                     }
                 })
 
@@ -94,5 +89,33 @@ export const connectToScorebot = (config: HLTVConfig) => ({
                     onDisconnect()
                 }
             })
+
+            if (onScoreUpdate) {
+                const socketScore = io.connect(url, {agent: !config.httpAgent})
+
+                socketScore.on('connect', () => {
+                    const done = () => socket.close()
+
+                    if (onConnect) {
+                        onConnect(true, 'score')
+                    }
+
+                    socketScore.emit('readyForScores', initObject)
+
+                    socketScore.on('score', data => {
+                        onScoreUpdate(data, done)
+                    })
+                })
+
+                socketScore.on('reconnect', () => {
+                    socketScore.emit('readyForScores', initObject)
+                })
+
+                socketScore.on('disconnect', () => {
+                    if (onDisconnect) {
+                        onDisconnect()
+                    }
+                })
+            }
         })
 }
