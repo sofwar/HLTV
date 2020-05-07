@@ -1,5 +1,6 @@
 import { defaultConfig, HLTVConfig } from './config'
 import { connectToScorebot } from './endpoints/connectToScorebot'
+import { connectToScorebotMatch } from './endpoints/connectToScorebotMatch'
 import { getMatch } from './endpoints/getMatch'
 import { getMatches } from './endpoints/getMatches'
 import { getMatchesStats } from './endpoints/getMatchesStats'
@@ -48,6 +49,8 @@ export class HLTVFactory {
   }
 
   connectToScorebot = connectToScorebot(this.config)
+  connectToScorebotMatch = connectToScorebotMatch(this.config)
+
   getMatch = getMatch(this.config)
   getMatches = getMatches(this.config)
   getMatchesStats = getMatchesStats(this.config)

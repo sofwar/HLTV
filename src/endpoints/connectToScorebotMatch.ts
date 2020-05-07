@@ -1,20 +1,27 @@
 import * as io from "socket.io-client"
+import { ScoreboardUpdate } from '../models/ScoreboardUpdate'
+import { LogUpdate } from '../models/LogUpdate'
 import { fetchPage } from '../utils/mappers'
 import { HLTVConfig } from '../config'
 
-export type ConnectToScorebotParams = {
+export type ConnectToScorebotMatchParams = {
     id: number
-    onScoreUpdate?: (data: unknown, done: () => void) => any
+    onScoreboardUpdate?: (data: ScoreboardUpdate, done: () => void) => any
+    onLogUpdate?: (data: LogUpdate, done: () => void) => any
+    onFullLogUpdate?: (data: unknown, done: () => void) => any
     onConnect?: (init: boolean) => any
     onDisconnect?: () => any
 }
 
-export const connectToScorebot = (config: HLTVConfig) => ({
+
+export const connectToScorebotMatch = (config: HLTVConfig) => ({
     id,
-    onScoreUpdate,
+    onScoreboardUpdate,
+    onLogUpdate,
+    onFullLogUpdate,
     onConnect,
     onDisconnect
-}: ConnectToScorebotParams) => {
+}: ConnectToScorebotMatchParams) => {
     fetchPage(`${config.hltvUrl}/matches/${id}/-`, config.loadPage)
         .then($ => {
             const scoreboardElement = $('#scoreboardElement');
@@ -50,17 +57,29 @@ export const connectToScorebot = (config: HLTVConfig) => ({
                     onConnect(true)
                 }
 
-                socket.emit('readyForScores', initObject)
+                socket.emit('readyForMatch', initObject)
 
-                socket.on('score', data => {
-                    if (onScoreUpdate) {
-                        onScoreUpdate(data, done)
+                socket.on('scoreboard', data => {
+                    if (onScoreboardUpdate) {
+                        onScoreboardUpdate(data, done)
+                    }
+                })
+
+                socket.on('log', data => {
+                    if (onLogUpdate) {
+                        onLogUpdate(JSON.parse(data), done)
+                    }
+                })
+
+                socket.on('fullLog', data => {
+                    if (onFullLogUpdate) {
+                        onFullLogUpdate(JSON.parse(data), done)
                     }
                 })
             })
 
             socket.on('reconnect', () => {
-                socket.emit('readyForScores', initObject)
+                socket.emit('readyForMatch', initObject)
             })
 
             socket.on('disconnect', () => {
