@@ -40,7 +40,7 @@ export const connectToScorebot = (config: HLTVConfig) => ({
 
             const initObject = JSON.stringify({
                 token: '',
-                listId: matchId
+                listIds: [matchId]
             })
 
             socket.on('connect', () => {
