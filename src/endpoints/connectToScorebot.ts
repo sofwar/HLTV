@@ -28,7 +28,9 @@ export const connectToScorebot = (config: HLTVConfig) => ({
             const scoreboardElement = $('#scoreboardElement');
 
             if (!scoreboardElement.length) {
-                onConnect(false)
+                if (onConnect) {
+                    onConnect(false)
+                }
 
                 return
             }
