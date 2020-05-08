@@ -23,6 +23,7 @@ export interface FullMatch {
   readonly event: Event
   readonly maps: MapResult[]
   readonly streams: Stream[]
+  readonly sockets: []
   readonly demos: Demo[]
   readonly players?: {
     team1: Player[]
