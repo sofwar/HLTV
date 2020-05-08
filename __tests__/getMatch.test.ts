@@ -9,5 +9,5 @@ test('getMatch', async () => {
   expect(await HLTV.getMatch({ id: 2302345 })).toMatchSnapshot()
   await sleep(3000)
   expect(await HLTV.getMatch({ id: 2290099 })).toMatchSnapshot()
-  expect(await HLTV.getMatch({ id: 2186795 })).toMatchSnapshot()
+  expect(await HLTV.getMatch({ id: 2340931 })).toMatchSnapshot()
 }, 30000)

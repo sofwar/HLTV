@@ -1,4 +1,4 @@
-import * as io from "socket.io-client"
+import * as io from 'socket.io-client'
 import { ScoreboardUpdate } from '../models/ScoreboardUpdate'
 import { LogUpdate } from '../models/LogUpdate'
 import { fetchPage } from '../utils/mappers'
