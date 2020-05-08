@@ -343,7 +343,7 @@ export const getMatch = (config: HLTVConfig) => async ({
     }
 
     const sockets = hasScorebot
-        ? $('#scoreboardElement').attr('data-scorebot-url').split(',')
+        ? $('#scoreboardElement').attr('data-scorebot-url')!.split(',')
         : []
 
     return {
