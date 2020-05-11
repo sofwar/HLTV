@@ -19,12 +19,12 @@ export const getMatches = (config: HLTVConfig) => async (): Promise<
 
     const team1: Team = {
       name: teamEls.first().attr('title')!,
-      id: Number(popSlashSource(teamEls.first())) || undefined
+      id: Number(popSlashSource(teamEls.first())) || 0
     }
 
     const team2: Team = {
       name: teamEls.last().attr('title')!,
-      id: Number(popSlashSource(teamEls.last())) || undefined
+      id: Number(popSlashSource(teamEls.last())) || 0
     }
 
     const format = matchEl.find('.bestof').text()
@@ -57,7 +57,7 @@ export const getMatches = (config: HLTVConfig) => async (): Promise<
           .find('div.team')
           .first()
           .text(),
-        id: Number(popSlashSource(matchEl.find('img.logo').first())) || undefined
+        id: Number(popSlashSource(matchEl.find('img.logo').first())) || 0
       }
 
       team2 = {
@@ -67,7 +67,7 @@ export const getMatches = (config: HLTVConfig) => async (): Promise<
           .text(),
         id: matchEl.find('img.logo').get(1)
           ? Number(popSlashSource($(matchEl.find('img.logo').last())))
-          : undefined
+          : 0
       }
       event = {
         name: matchEl.find('.event-logo').attr('alt')!,
