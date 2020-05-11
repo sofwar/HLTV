@@ -255,16 +255,32 @@ export const getMatch = (config: HLTVConfig) => async ({
 
     let streams: Stream[] = toArray($('.stream-box-embed'))
         .filter(hasChild('.stream-flag'))
-        .map(streamEl => ({
-            name: streamEl.text(),
-            link: streamEl.attr('data-stream-embed')!,
-            viewers: Number(streamEl.parent().find('.viewers.left-right-padding').text())
-        }))
+        .map(streamEl => {
+            const flagEl = streamEl.find('.stream-flag');
+            let langImg = flagEl.length ? streamEl.find('.stream-flag').attr('src') : undefined;
+
+            if (langImg) {
+                langImg = langImg
+                    .replace('https://static.hltv.org/images/bigflags/30x20/', '')
+                    .replace('.gif', '')
+                    .toLowerCase()
+            }
+
+            return {
+                name: streamEl.text(),
+                link: streamEl.attr('data-stream-embed')!,
+                country: flagEl.length ? streamEl.find('.stream-flag').attr('title') : undefined,
+                lang: langImg,
+                viewers: Number(streamEl.parent().find('.viewers.left-right-padding').text())
+            }
+        })
 
     if ($('.stream-box.hltv-live').length !== 0) {
         streams.push({
             name: 'HLTV Live',
             link: $('.stream-box.hltv-live a').attr('href')!,
+            country: undefined,
+            lang: 'en',
             viewers: 0
         })
     }
@@ -276,6 +292,8 @@ export const getMatch = (config: HLTVConfig) => async ({
                 .text()
                 .replace('GOTV: connect', '')
                 .trim(),
+            country: undefined,
+            lang: 'en',
             viewers: 0
         })
     }
