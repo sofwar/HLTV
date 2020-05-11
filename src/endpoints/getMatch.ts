@@ -54,19 +54,31 @@ export const getMatch = (config: HLTVConfig) => async ({
     const hasScorebot = $('#scoreboardElement').length !== 0
     const teamEls = $('div.teamName')
 
-    const team1: Team | undefined = teamEls.first().text()
-        ? {
-            name: teamEls.eq(0).text(),
-            id: Number(popSlashSource(teamEls.first().prev()))
-        }
-        : undefined
+    const team1: Team = {
+        id: 0,
+        name: 'TBD'
+    }
 
-    const team2: Team | undefined = teamEls.last().text()
-        ? {
-            name: teamEls.eq(1).text(),
-            id: Number(popSlashSource(teamEls.last().prev()))
-        }
-        : undefined
+    const team2: Team = {
+        id: 0,
+        name: 'TBD'
+    }
+
+    const scores = {}
+
+    if (teamEls.first().text()) {
+        team1.id = Number(popSlashSource(teamEls.first().prev()))
+        team1.name = teamEls.eq(0).text()
+
+        scores[team1.id] = 0
+    }
+
+    if (teamEls.last().text()) {
+        team2.id = Number(popSlashSource(teamEls.last().prev()))
+        team2.name = teamEls.eq(1).text()
+
+        scores[team2.id] = 0
+    }
 
     let winnerTeam: Team | undefined
 
@@ -90,7 +102,7 @@ export const getMatch = (config: HLTVConfig) => async ({
 
     let vetoes: Veto[] | undefined
 
-    if (team1 && team2) {
+    if (team1.id > 0 && team2.id > 0) {
         vetoes = toArray(
             $('.veto-box')
                 .last()
@@ -180,6 +192,7 @@ export const getMatch = (config: HLTVConfig) => async ({
         }
     }
 
+
     const maps: MapResult[] = toArray($('.mapholder')).map(mapEl => {
         const team1Rounds = mapEl
             .find('.results-left .results-team-score')
@@ -194,23 +207,34 @@ export const getMatch = (config: HLTVConfig) => async ({
             .text()
             .trim()
 
+        const statsId = mapEl.find('.results-stats').length ? Number(
+            mapEl
+                .find('.results-stats')
+                .attr('href')!
+                .split('/')[4]
+            )
+            : undefined
+
+        if (statsId) {
+            scores[team1Rounds > team2Rounds ? team1.id : team2.id]++
+        }
+
+        const mapScores = {}
+
+        mapScores[team1.id] = team1Rounds
+        mapScores[team2.id] = team2Rounds
+
         return {
             name: getMapSlug(mapEl.find('.mapname').text()),
             result: team1Rounds ? `${team1Rounds}:${team2Rounds} ${halfs}` : undefined,
-            statsId: mapEl.find('.results-stats').length
-                ? Number(
-                    mapEl
-                        .find('.results-stats')
-                        .attr('href')!
-                        .split('/')[4]
-                )
-                : undefined
+            scores: mapScores,
+            statsId: statsId
         }
     })
 
     let players: { team1: Player[]; team2: Player[] } | undefined
 
-    if (team1 && team2) {
+    if (team1.id > 0 && team2.id > 0) {
         players = {
             team1: toArray(
                 $('div.players')
@@ -352,6 +376,7 @@ export const getMatch = (config: HLTVConfig) => async ({
         team1,
         team2,
         winnerTeam,
+        scores,
         date,
         format,
         additionalInfo,

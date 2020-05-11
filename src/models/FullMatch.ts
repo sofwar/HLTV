@@ -16,6 +16,7 @@ export interface FullMatch {
     readonly team1?: Team
     readonly team2?: Team
     readonly winnerTeam?: Team
+    readonly scores: object
     readonly date: number
     readonly format: string
     readonly additionalInfo: string
