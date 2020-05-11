@@ -257,20 +257,28 @@ export const getMatch = (config: HLTVConfig) => async ({
         .filter(hasChild('.stream-flag'))
         .map(streamEl => {
             const flagEl = streamEl.find('.stream-flag');
-            let langImg = flagEl.length ? streamEl.find('.stream-flag').attr('src') : undefined;
+            const country = flagEl.length ? streamEl.find('.stream-flag').attr('title') : undefined;
+            let lang = 'en';
 
-            if (langImg) {
-                langImg = langImg
-                    .replace('https://static.hltv.org/images/bigflags/30x20/', '')
-                    .replace('.gif', '')
-                    .toLowerCase()
+            if (country) {
+                if (country === 'Germany') {
+                    lang = 'de'
+                } else if (country === 'Poland') {
+                    lang = 'pl'
+                } else if (country === 'Hungary') {
+                    lang = 'hu'
+                } else if (country === 'Denmark') {
+                    lang = 'da'
+                } else if (country === 'Russia') {
+                    lang = 'ru'
+                }
             }
 
             return {
                 name: streamEl.text(),
                 link: streamEl.attr('data-stream-embed')!,
-                country: flagEl.length ? streamEl.find('.stream-flag').attr('title') : undefined,
-                lang: langImg,
+                country: country,
+                lang: lang,
                 viewers: Number(streamEl.parent().find('.viewers.left-right-padding').text())
             }
         })
