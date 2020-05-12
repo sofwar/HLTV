@@ -52,16 +52,19 @@ export const getMatch = (config: HLTVConfig) => async ({
 
     const live = status === MatchStatus.Live
     const hasScorebot = $('#scoreboardElement').length !== 0
+
     const teamEls = $('div.teamName')
 
     const team1: Team = {
         id: 0,
-        name: 'TBD'
+        name: 'TBD',
+        logo: null
     }
 
     const team2: Team = {
         id: 0,
-        name: 'TBD'
+        name: 'TBD',
+        logo: null
     }
 
     const scores = {}
@@ -69,6 +72,7 @@ export const getMatch = (config: HLTVConfig) => async ({
     if (teamEls.first().text()) {
         team1.id = Number(popSlashSource(teamEls.first().prev()))
         team1.name = teamEls.eq(0).text()
+        team1.logo = teamEls.first().prev().toString();
 
         scores[team1.id] = 0
     }
@@ -76,6 +80,7 @@ export const getMatch = (config: HLTVConfig) => async ({
     if (teamEls.last().text()) {
         team2.id = Number(popSlashSource(teamEls.last().prev()))
         team2.name = teamEls.eq(1).text()
+        team2.logo = teamEls.last().prev().toString();
 
         scores[team2.id] = 0
     }
@@ -282,16 +287,6 @@ export const getMatch = (config: HLTVConfig) => async ({
                 viewers: Number(streamEl.parent().find('.viewers.left-right-padding').text())
             }
         })
-
-    if ($('.stream-box.hltv-live').length !== 0) {
-        streams.push({
-            name: 'HLTV Live',
-            link: $('.stream-box.hltv-live a').attr('href')!,
-            country: undefined,
-            lang: 'en',
-            viewers: 0
-        })
-    }
 
     if ($('.stream-box.gotv').length !== 0) {
         streams.push({
