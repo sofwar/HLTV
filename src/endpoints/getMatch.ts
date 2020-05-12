@@ -72,7 +72,7 @@ export const getMatch = (config: HLTVConfig) => async ({
     if (teamEls.first().text()) {
         team1.id = Number(popSlashSource(teamEls.first().prev()))
         team1.name = teamEls.eq(0).text()
-        team1.logo = teamEls.first().prev().toString();
+        team1.logo = teamEls.first().prev().attr('src');
 
         scores[team1.id] = 0
     }
@@ -80,7 +80,7 @@ export const getMatch = (config: HLTVConfig) => async ({
     if (teamEls.last().text()) {
         team2.id = Number(popSlashSource(teamEls.last().prev()))
         team2.name = teamEls.eq(1).text()
-        team2.logo = teamEls.last().prev().toString();
+        team2.logo = teamEls.last().prev().attr('src')!;
 
         scores[team2.id] = 0
     }
