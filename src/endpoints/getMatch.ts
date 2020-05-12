@@ -276,6 +276,10 @@ export const getMatch = (config: HLTVConfig) => async ({
                     lang = 'da'
                 } else if (country === 'Russia') {
                     lang = 'ru'
+                } else if (country === 'France') {
+                    lang = 'fr'
+                } else if (country === 'Serbia') {
+                    lang = 'rs'
                 }
             }
 
