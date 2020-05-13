@@ -5,3 +5,6 @@ export enum MatchStatus {
   Scheduled = 'Scheduled',
   Deleted = 'Match deleted'
 }
+
+// forfeited
+// forfeits

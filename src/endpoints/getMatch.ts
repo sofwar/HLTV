@@ -18,7 +18,8 @@ import {
     toArray,
     mapVetoElementToModel,
     getMapSlug,
-    getMatchPlayer
+    getMatchPlayer,
+    getMatchFormat
 } from '../utils/mappers'
 
 export const getMatch = (config: HLTVConfig) => async ({
@@ -28,27 +29,25 @@ export const getMatch = (config: HLTVConfig) => async ({
 }): Promise<FullMatch> => {
     const $ = await fetchPage(`${config.hltvUrl}/matches/${id}/-`, config.loadPage)
 
-    const title =
-        $('.timeAndEvent .text')
-            .text()
-            .trim() || undefined
+    const title = $('.timeAndEvent .text').text().trim() || undefined
+
     const date = Number($('.timeAndEvent .date').attr('data-unix'))
-    const format = $('.preformatted-text')
-        .text()
-        .split('\n')[0]
-    const additionalInfo = $('.preformatted-text')
-        .text()
-        .split('\n')
-        .slice(1)
-        .join(' ')
-        .trim()
+
+    const preformattedText = $('.preformatted-text').text().split('\n')
+
+    const format = getMatchFormat(preformattedText[0])
+
+    const additionalInfo = preformattedText.slice(1).join(' ').trim()
 
     let status = MatchStatus.Scheduled
+
     if (!$('.countdown').attr('data-time-countdown')) {
         status = $('.countdown').text() as MatchStatus
     } else if ($('.countdown').text() === MatchStatus.Live) {
         status = MatchStatus.Live
     }
+
+    let tie = false
 
     const live = status === MatchStatus.Live
     const hasScorebot = $('#scoreboardElement').length !== 0
@@ -75,6 +74,8 @@ export const getMatch = (config: HLTVConfig) => async ({
         team1.logo = teamEls.first().prev().attr('src');
 
         scores[team1.id] = 0
+    } else {
+        scores['TBD-1'] = 0
     }
 
     if (teamEls.last().text()) {
@@ -83,25 +84,21 @@ export const getMatch = (config: HLTVConfig) => async ({
         team2.logo = teamEls.last().prev().attr('src')!;
 
         scores[team2.id] = 0
+    } else {
+        scores['TBD-2'] = 0
     }
 
     let winnerTeam: Team | undefined
 
-    if (
-        $('.team1-gradient')
-            .children()
-            .last()
-            .hasClass('won')
-    ) {
-        winnerTeam = team1
-    }
+    const team1ScoreEls = $('.team1-gradient').children().last();
+    const team2ScoreEls = $('.team2-gradient').children().last()
 
-    if (
-        $('.team2-gradient')
-            .children()
-            .last()
-            .hasClass('won')
-    ) {
+    scores[team1.id] = parseInt(team1ScoreEls.text())
+    scores[team2.id] = parseInt(team2ScoreEls.text())
+
+    if (team1ScoreEls.hasClass('won')) {
+        winnerTeam = team1
+    } else if (team2ScoreEls.hasClass('won')) {
         winnerTeam = team2
     }
 
@@ -197,16 +194,17 @@ export const getMatch = (config: HLTVConfig) => async ({
         }
     }
 
-
     const maps: MapResult[] = toArray($('.mapholder')).map(mapEl => {
         const team1Rounds = mapEl
             .find('.results-left .results-team-score')
             .text()
             .trim()
+
         const team2Rounds = mapEl
             .find('.results-right .results-team-score')
             .text()
             .trim()
+
         const halfs = mapEl
             .find('.results-center-half-score')
             .text()
@@ -221,7 +219,11 @@ export const getMatch = (config: HLTVConfig) => async ({
             : undefined
 
         if (statsId) {
-            scores[team1Rounds > team2Rounds ? team1.id : team2.id]++
+            if (team1Rounds !== team2Rounds) {
+                scores[team1Rounds > team2Rounds ? team1.id : team2.id]++
+            } else {
+                tie = true
+            }
         }
 
         const mapScores = {}
@@ -410,6 +412,7 @@ export const getMatch = (config: HLTVConfig) => async ({
         players,
         streams,
         live,
+        tie,
         status,
         title,
         hasScorebot,

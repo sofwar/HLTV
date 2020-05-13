@@ -32,6 +32,7 @@ export interface FullMatch {
     }
     readonly title?: string
     readonly live: boolean
+    readonly tie: boolean
     readonly status: MatchStatus
     readonly hasScorebot: boolean
     readonly highlightedPlayer?: Player
