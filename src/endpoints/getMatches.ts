@@ -26,23 +26,20 @@ export const getMatches = (config: HLTVConfig) => async ({
         let team2: Team | undefined
 
         if (!title) {
+            const teams = matchEl.find('img.logo');
+
             team1 = {
-                name: matchEl
-                    .find('div.team')
-                    .first()
-                    .text(),
-                id: Number(popSlashSource(matchEl.find('img.logo').first())) || 0
+                id: teams.get(0) ? Number(popSlashSource($(teams.first()))) : 0,
+                name: matchEl.find('div.team').first().text(),
+                logo: teams.get(0) ? teams.first().attr('src') : null
             }
 
             team2 = {
-                name: matchEl
-                    .find('div.team')
-                    .last()
-                    .text(),
-                id: matchEl.find('img.logo').get(1)
-                    ? Number(popSlashSource($(matchEl.find('img.logo').last())))
-                    : 0
+                id: teams.get(1) ? Number(popSlashSource($(teams.last()))) : 0,
+                name: matchEl.find('div.team').last().text(),
+                logo: teams.get(1) ? teams.last().attr('src') : null
             }
+
             event = {
                 name: matchEl.find('.event-logo').attr('alt')!,
                 id: Number(popSlashSource(matchEl.find('img.event-logo'))!.split('.')[0]) || undefined
@@ -62,13 +59,15 @@ export const getMatches = (config: HLTVConfig) => async ({
         const stars = matchEl.find('.stars i').length
 
         const team1: Team = {
+            id: Number(popSlashSource(teamEls.first())) || 0,
             name: teamEls.first().attr('title')!,
-            id: Number(popSlashSource(teamEls.first())) || 0
+            logo: teamEls.first().attr('src')!
         }
 
         const team2: Team = {
+            id: Number(popSlashSource(teamEls.last())) || 0,
             name: teamEls.last().attr('title')!,
-            id: Number(popSlashSource(teamEls.last())) || 0
+            logo: teamEls.last().attr('src')!
         }
 
         const format = matchEl.find('.bestof').text()

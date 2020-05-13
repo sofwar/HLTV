@@ -8,89 +8,87 @@ import { fetchPage, toArray, getMatchFormatAndMap } from '../utils/mappers'
 import { ContentFilter } from '../enums/ContentFilter'
 
 type GetResultsArguments =
-  | { pages?: number; teamID?: number; eventID?: never; contentFilters?: ContentFilter[] }
-  | { pages?: never; teamID?: number; eventID?: number; contentFilters?: ContentFilter[] }
+    | { pages?: number; teamID?: number; eventID?: never; contentFilters?: ContentFilter[] }
+    | { pages?: never; teamID?: number; eventID?: number; contentFilters?: ContentFilter[] }
 
 export const getResults = (config: HLTVConfig) => async ({
-  pages = 1,
-  teamID,
-  eventID,
-  contentFilters = []
+    pages = 1,
+    teamID,
+    eventID,
+    contentFilters = []
 }: GetResultsArguments): Promise<MatchResult[]> => {
-  if (pages < 1) {
-    console.error('getLatestResults: pages cannot be less than 1')
-    return []
-  }
-
-  let matches: MatchResult[] = []
-
-  for (let i = 0; i < pages; i++) {
-    let url = `${config.hltvUrl}/results?offset=${i * 100}`
-
-    if (teamID) url += `&team=${teamID}`
-    if (eventID) url += `&event=${eventID}`
-    for (const filter of contentFilters) {
-      url += `&content=${filter}`
+    if (pages < 1) {
+        console.error('getLatestResults: pages cannot be less than 1')
+        return []
     }
 
-    const $ = await fetchPage(url, config.loadPage)
+    let matches: MatchResult[] = []
 
-    matches = matches.concat(
-      toArray($('.results-holder > .results-all > .results-sublist .result-con .a-reset')).map(
-        matchEl => {
-          const id = Number(matchEl.attr('href')!.split('/')[2])
-          const stars = matchEl.find('.stars i').length
+    for (let i = 0; i < pages; i++) {
+        let url = `${config.hltvUrl}/results?offset=${i * 100}`
 
-          const team1: Team = {
-            id: Number(popSlashSource(matchEl.find('img.team-logo').first())),
-            name: matchEl
-              .find('div.team')
-              .first()
-              .text()
-          }
+        if (teamID) url += `&team=${teamID}`
+        if (eventID) url += `&event=${eventID}`
 
-          const team2: Team = {
-            id: Number(popSlashSource(matchEl.find('img.team-logo').last())),
-            name: matchEl
-              .find('div.team')
-              .last()
-              .text()
-          }
-
-          const result = matchEl.find('.result-score').text()
-          const { map, format } = getMatchFormatAndMap(matchEl.find('.map-text').text()) as {
-            map: MapSlug | undefined
-            format: string
-          }
-
-          let idOfEvent =
-            typeof eventID === 'undefined'
-              ? popSlashSource(matchEl.find('.event-logo'))!.split('.')[0]
-              : eventID
-          let nameOfEvent =
-            typeof eventID === 'undefined'
-              ? matchEl.find('.event-logo').attr('alt')!
-              : $('.eventname').text()
-
-          const event: Event = {
-            name: nameOfEvent,
-            id: Number(idOfEvent)
-          }
-
-          let eventDate =
-            typeof eventID === 'undefined'
-              ? matchEl.parent().attr('data-zonedgrouping-entry-unix')
-              : $('.eventdate span')
-                  .first()
-                  .data('unix')
-
-          const date = Number(eventDate)
-
-          return { id, team1, team2, result, event, map, format, stars, date }
+        for (const filter of contentFilters) {
+            url += `&content=${filter}`
         }
-      )
-    )
-  }
 
-  return matches
+        const $ = await fetchPage(url, config.loadPage)
+
+        matches = matches.concat(
+            toArray($('.results-holder > .results-all > .results-sublist .result-con .a-reset')).map(
+                matchEl => {
+                    const id = Number(matchEl.attr('href')!.split('/')[2])
+                    const teamEls = matchEl.find('img.team-logo')
+                    const stars = matchEl.find('.stars i').length
+                    
+                    const team1: Team = {
+                        id: Number(popSlashSource(teamEls.first())) || 0,
+                        name: teamEls.first().attr('title')!,
+                        logo: teamEls.first().attr('src')!
+                    }
+
+                    const team2: Team = {
+                        id: Number(popSlashSource(teamEls.last())) || 0,
+                        name: teamEls.last().attr('title')!,
+                        logo: teamEls.last().attr('src')!
+                    }
+
+                    const result = matchEl.find('.result-score').text()
+
+                    const {map, format} = getMatchFormatAndMap(matchEl.find('.map-text').text()) as {
+                        map: MapSlug | undefined
+                        format: string
+                    }
+
+                    let idOfEvent =
+                        typeof eventID === 'undefined'
+                            ? popSlashSource(matchEl.find('.event-logo'))!.split('.')[0]
+                            : eventID
+
+                    let nameOfEvent =
+                        typeof eventID === 'undefined'
+                            ? matchEl.find('.event-logo').attr('alt')!
+                            : $('.eventname').text()
+
+                    const event: Event = {
+                        name: nameOfEvent,
+                        id: Number(idOfEvent)
+                    }
+
+                    let eventDate =
+                        typeof eventID === 'undefined'
+                            ? matchEl.parent().attr('data-zonedgrouping-entry-unix')
+                            : $('.eventdate span').first().data('unix')
+
+                    const date = Number(eventDate)
+
+                    return {id, team1, team2, result, event, map, format, stars, date}
+                }
+            )
+        )
+    }
+
+    return matches
 }
