@@ -5,7 +5,7 @@ import { Team } from '../models/Team'
 import { MapSlug } from '../enums/MapSlug'
 import { popSlashSource, text } from '../utils/parsing'
 import { HLTVConfig } from '../config'
-import { fetchPage, toArray, getMatchFormatAndMap } from '../utils/mappers'
+import { fetchPage, toArray, getMatchFormatAndMap, getMatchFormat } from '../utils/mappers'
 
 export const getMatches = (config: HLTVConfig) => async ({
     type = 'all'
@@ -70,7 +70,7 @@ export const getMatches = (config: HLTVConfig) => async ({
             logo: teamEls.last().attr('src')!
         }
 
-        const format = matchEl.find('.bestof').text()
+        const format = getMatchFormat(matchEl.find('.bestof').text())
         const maps = toArray(matchEl.find('.header .map')).map(text) as MapSlug[]
 
         const event: Event = {
