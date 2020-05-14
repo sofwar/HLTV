@@ -1,15 +1,15 @@
-import { UpcomingMatch } from '../models/UpcomingMatch'
-import { LiveMatch } from '../models/LiveMatch'
-import { Event } from '../models/Event'
-import { Team } from '../models/Team'
-import { MapSlug } from '../enums/MapSlug'
-import { popSlashSource, text } from '../utils/parsing'
-import { HLTVConfig } from '../config'
-import { fetchPage, toArray, getMatchFormatAndMap, getMatchFormat } from '../utils/mappers'
+import {UpcomingMatch} from '../models/UpcomingMatch'
+import {LiveMatch} from '../models/LiveMatch'
+import {Event} from '../models/Event'
+import {Team} from '../models/Team'
+import {MapSlug} from '../enums/MapSlug'
+import {popSlashSource, text} from '../utils/parsing'
+import {HLTVConfig} from '../config'
+import {fetchPage, toArray, getMatchFormatAndMap, getMatchFormat} from '../utils/mappers'
 
 export const getMatches = (config: HLTVConfig) => async ({
-    type = 'all'
-} = {}): Promise<(UpcomingMatch | LiveMatch)[]> => {
+                                                             type = 'all'
+                                                         } = {}): Promise<(UpcomingMatch | LiveMatch)[]> => {
     const $ = await fetchPage(`${config.hltvUrl}/matches`, config.loadPage)
 
     const upcomingMatches: UpcomingMatch[] = toArray($('.upcoming-match')).map(matchEl => {
@@ -43,6 +43,12 @@ export const getMatches = (config: HLTVConfig) => async ({
             event = {
                 name: matchEl.find('.event-logo').attr('alt')!,
                 id: Number(popSlashSource(matchEl.find('img.event-logo'))!.split('.')[0]) || undefined
+            }
+        } else {
+            team1 = team2 = {
+                id: 0,
+                name: 'TBD',
+                logo: null
             }
         }
 
