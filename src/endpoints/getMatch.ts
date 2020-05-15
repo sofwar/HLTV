@@ -1,18 +1,18 @@
-import { FullMatch } from '../models/FullMatch'
-import { Event } from '../models/Event'
-import { MapResult } from '../models/MapResult'
-import { OddResult, CommunityOddResult } from '../models/OddResult'
-import { Player } from '../models/Player'
-import { Stream } from '../models/Stream'
-import { Team } from '../models/Team'
-import { Demo } from '../models/Demo'
-import { Highlight } from '../models/Highlight'
-import { Veto } from '../models/Veto'
-import { HeadToHeadResult } from '../models/HeadToHeadResult'
-import { MapSlug } from '../enums/MapSlug'
-import { MatchStatus } from '../enums/MatchStatus'
-import { popSlashSource, hasChild, hasNoChild, percentageToDecimalOdd } from '../utils/parsing'
-import { HLTVConfig } from '../config'
+import {FullMatch} from '../models/FullMatch'
+import {Event} from '../models/Event'
+import {MapResult} from '../models/MapResult'
+import {OddResult, CommunityOddResult} from '../models/OddResult'
+import {Player} from '../models/Player'
+import {Stream} from '../models/Stream'
+import {Team} from '../models/Team'
+import {Demo} from '../models/Demo'
+import {Highlight} from '../models/Highlight'
+import {Veto} from '../models/Veto'
+import {HeadToHeadResult} from '../models/HeadToHeadResult'
+import {MapSlug} from '../enums/MapSlug'
+import {MatchStatus} from '../enums/MatchStatus'
+import {popSlashSource, hasChild, hasNoChild, percentageToDecimalOdd} from '../utils/parsing'
+import {HLTVConfig} from '../config'
 import {
     fetchPage,
     toArray,
@@ -23,8 +23,8 @@ import {
 } from '../utils/mappers'
 
 export const getMatch = (config: HLTVConfig) => async ({
-    id
-}: {
+                                                           id
+                                                       }: {
     id: number
 }): Promise<FullMatch> => {
     const $ = await fetchPage(`${config.hltvUrl}/matches/${id}/-`, config.loadPage)
@@ -90,15 +90,9 @@ export const getMatch = (config: HLTVConfig) => async ({
 
     let winnerTeam: Team | undefined
 
-    const team1ScoreEls = $('.team1-gradient').children().last();
-    const team2ScoreEls = $('.team2-gradient').children().last()
-
-    scores[team1.id] = parseInt(team1ScoreEls.text())
-    scores[team2.id] = parseInt(team2ScoreEls.text())
-
-    if (team1ScoreEls.hasClass('won')) {
+    if ($('.team1-gradient').children().last().hasClass('won')) {
         winnerTeam = team1
-    } else if (team2ScoreEls.hasClass('won')) {
+    } else if ($('.team2-gradient').children().last().hasClass('won')) {
         winnerTeam = team2
     }
 
