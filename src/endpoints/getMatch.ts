@@ -189,15 +189,8 @@ export const getMatch = (config: HLTVConfig) => async ({
     }
 
     const maps: MapResult[] = toArray($('.mapholder')).map(mapEl => {
-        const team1Rounds = mapEl
-            .find('.results-left .results-team-score')
-            .text()
-            .trim()
-
-        const team2Rounds = mapEl
-            .find('.results-right .results-team-score')
-            .text()
-            .trim()
+        const team1Rounds = Number(mapEl.find('.results-left .results-team-score').text().trim())
+        const team2Rounds = Number(mapEl.find('.results-right .results-team-score').text().trim())
 
         const halfs = mapEl
             .find('.results-center-half-score')
@@ -212,7 +205,7 @@ export const getMatch = (config: HLTVConfig) => async ({
             )
             : undefined
 
-        if (statsId && team1Rounds !== '-' && team2Rounds !== '-') {
+        if (statsId && team1Rounds > 0 && team2Rounds > 0) {
             if (team1Rounds !== team2Rounds) {
                 scores[team1Rounds > team2Rounds ? team1.id : team2.id]++
             } else {
