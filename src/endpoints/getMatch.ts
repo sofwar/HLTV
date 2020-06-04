@@ -212,7 +212,7 @@ export const getMatch = (config: HLTVConfig) => async ({
             )
             : undefined
 
-        if (statsId) {
+        if (statsId && team1Rounds !== '-' && team2Rounds !== '-') {
             if (team1Rounds !== team2Rounds) {
                 scores[team1Rounds > team2Rounds ? team1.id : team2.id]++
             } else {
