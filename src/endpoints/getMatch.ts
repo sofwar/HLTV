@@ -22,18 +22,14 @@ import {
     getMatchFormat
 } from '../utils/mappers'
 
-export const getMatch = (config: HLTVConfig) => async ({
-                                                           id
-                                                       }: {
-    id: number
-}): Promise<FullMatch> => {
+export const getMatch = (config: HLTVConfig) => async ({id}: { id: number }): Promise<FullMatch> => {
     const $ = await fetchPage(`${config.hltvUrl}/matches/${id}/-`, config.loadPage)
 
     const title = $('.timeAndEvent .text').text().trim() || undefined
 
     const date = Number($('.timeAndEvent .date').attr('data-unix'))
 
-    const preformattedText = $('.preformatted-text').text().split('\n')
+    const preformattedText = $('.preformatted-text').text()!.split('\n')
 
     const format = getMatchFormat(preformattedText[0])
 
@@ -205,7 +201,7 @@ export const getMatch = (config: HLTVConfig) => async ({
             )
             : undefined
 
-        if (statsId && team1Rounds > 0 && team2Rounds > 0) {
+        if (statsId && team1Rounds && team2Rounds) {
             if (team1Rounds !== team2Rounds) {
                 scores[team1Rounds > team2Rounds ? team1.id : team2.id]++
             } else {
