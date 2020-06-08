@@ -4,6 +4,7 @@ import { EventType } from '../enums/EventType'
 export interface SimpleEvent {
   id: number
   name: string
+  logo?: string
   dateStart?: number
   dateEnd?: number
   prizePool: string
