@@ -1,7 +1,7 @@
 import {FullMatch} from '../models/FullMatch'
 import {Event} from '../models/Event'
 import {MapResult} from '../models/MapResult'
-import {OddResult, CommunityOddResult} from '../models/OddResult'
+import {CommunityOddResult, OddResult} from '../models/OddResult'
 import {Player} from '../models/Player'
 import {Stream} from '../models/Stream'
 import {Team} from '../models/Team'
@@ -11,16 +11,9 @@ import {Veto} from '../models/Veto'
 import {HeadToHeadResult} from '../models/HeadToHeadResult'
 import {MapSlug} from '../enums/MapSlug'
 import {MatchStatus} from '../enums/MatchStatus'
-import {popSlashSource, hasChild, hasNoChild, percentageToDecimalOdd} from '../utils/parsing'
+import {hasChild, hasNoChild, percentageToDecimalOdd, popSlashSource} from '../utils/parsing'
 import {HLTVConfig} from '../config'
-import {
-    fetchPage,
-    toArray,
-    mapVetoElementToModel,
-    getMapSlug,
-    getMatchPlayer,
-    getMatchFormat
-} from '../utils/mappers'
+import {fetchPage, getMapSlug, getMatchFormat, getMatchPlayer, mapVetoElementToModel, toArray} from '../utils/mappers'
 
 export const getMatch = (config: HLTVConfig) => async ({id}: { id: number }): Promise<FullMatch> => {
     const $ = await fetchPage(`${config.hltvUrl}/matches/${id}/-`, config.loadPage)
@@ -379,6 +372,11 @@ export const getMatch = (config: HLTVConfig) => async ({id}: { id: number }): Pr
     const sockets = hasScorebot
         ? $('#scoreboardElement').attr('data-scorebot-url')!.split(',')
         : []
+
+    if (status === MatchStatus.Over) {
+        scores[team1.id] = $('.team1-gradient').children().last().eq(0);
+        scores[team2.id] = $('.team2-gradient').children().last().eq(0);
+    }
 
     return {
         id,
