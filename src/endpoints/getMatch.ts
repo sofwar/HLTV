@@ -373,9 +373,11 @@ export const getMatch = (config: HLTVConfig) => async ({id}: { id: number }): Pr
         ? $('#scoreboardElement').attr('data-scorebot-url')!.split(',')
         : []
 
+    console.log(status, MatchStatus.Over, status === MatchStatus.Over)
+
     if (status === MatchStatus.Over) {
-        scores[team1.id] = Number($('.team1-gradient').children().last().text());
-        scores[team2.id] = Number($('.team2-gradient').children().last().text());
+        scores[team1.id] = Number($('.team1-gradient > div').text().trim());
+        scores[team2.id] = Number($('.team2-gradient > div').text().trim()); //.children().last()
     }
 
     return {
