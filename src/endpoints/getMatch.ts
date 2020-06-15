@@ -374,12 +374,8 @@ export const getMatch = (config: HLTVConfig) => async ({id}: { id: number }): Pr
         : []
 
     if (status === MatchStatus.Over) {
-        try {
-            scores[team1.id] = $('.team1-gradient').children().last().eq(0);
-            scores[team2.id] = $('.team2-gradient').children().last().eq(0);
-        } catch (e) {
-            console.log(e, 'asdasd')
-        }
+        scores[team1.id] = Number($('.team1-gradient').children().last().text());
+        scores[team2.id] = Number($('.team2-gradient').children().last().text());
     }
 
     return {
