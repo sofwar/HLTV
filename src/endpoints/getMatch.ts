@@ -1,3 +1,5 @@
+import { randomBytes } from 'crypto'
+
 import { FullMatch } from '../models/FullMatch'
 import { Event } from '../models/Event'
 import { MapResult } from '../models/MapResult'
@@ -14,8 +16,10 @@ import { hasChild, popSlashSource } from '../utils/parsing'
 import { HLTVConfig } from '../config'
 import { fetchPage, getMapSlug, getMatchFormat, getMatchPlayer, mapVetoElementToModel, toArray } from '../utils/mappers'
 
+const strRandom = (size) => randomBytes(size).toString('hex')
+
 export const getMatch = (config: HLTVConfig) => async ({ id }: { id: number }): Promise<FullMatch | null> => {
-    const $ = await fetchPage(`${config.hltvUrl}/matches/${id}/${config.strRandom(15)}`, config.loadPage)
+    const $ = await fetchPage(`${config.hltvUrl}/matches/${id}/${strRandom(15)}`, config.loadPage)
 
     /*if ($('.cf-error-code').length) {
         console.log(resetCount)
@@ -107,7 +111,7 @@ export const getMatch = (config: HLTVConfig) => async ({ id }: { id: number }): 
             .slice(0, -1)
             .map(el => mapVetoElementToModel(el, team1, team2))
     }
-    
+
     const event: Event = {
         name: $('.timeAndEvent > .event').text(),
         id: $('.timeAndEvent .event').length ? Number($('.timeAndEvent .event').children().first().attr('href')!.split('/')[2]) : undefined
