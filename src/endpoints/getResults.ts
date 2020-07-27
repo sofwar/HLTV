@@ -1,11 +1,11 @@
 import { MatchResult } from '../models/MatchResult'
 import { Event } from '../models/Event'
 import { Team } from '../models/Team'
-import { MapSlug } from '../enums/MapSlug'
+import { MapSlug } from '..'
 import { popSlashSource } from '../utils/parsing'
 import { HLTVConfig } from '../config'
 import { fetchPage, toArray, getMatchFormatAndMap } from '../utils/mappers'
-import { ContentFilter } from '../enums/ContentFilter'
+import { ContentFilter } from '..'
 
 type GetResultsArguments =
     | { pages?: number; teamID?: number; eventID?: never; contentFilters?: ContentFilter[] }
@@ -42,7 +42,7 @@ export const getResults = (config: HLTVConfig) => async ({
                     const id = Number(matchEl.attr('href')!.split('/')[2])
                     const teamEls = matchEl.find('img.team-logo')
                     const stars = matchEl.find('.stars i').length
-                    
+
                     const team1: Team = {
                         id: Number(popSlashSource(teamEls.first())) || 0,
                         name: teamEls.first().attr('title')!,
@@ -57,7 +57,7 @@ export const getResults = (config: HLTVConfig) => async ({
 
                     const result = matchEl.find('.result-score').text()
 
-                    const {map, format} = getMatchFormatAndMap(matchEl.find('.map-text').text()) as {
+                    const { map, format } = getMatchFormatAndMap(matchEl.find('.map-text').text()) as {
                         map: MapSlug | undefined
                         format: string
                     }
@@ -84,7 +84,7 @@ export const getResults = (config: HLTVConfig) => async ({
 
                     const date = Number(eventDate)
 
-                    return {id, team1, team2, result, event, map, format, stars, date}
+                    return { id, team1, team2, result, event, map, format, stars, date }
                 }
             )
         )

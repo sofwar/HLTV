@@ -1,27 +1,38 @@
-import {FullMatch} from '../models/FullMatch'
-import {Event} from '../models/Event'
-import {MapResult} from '../models/MapResult'
-import {CommunityOddResult, OddResult} from '../models/OddResult'
-import {Player} from '../models/Player'
-import {Stream} from '../models/Stream'
-import {Team} from '../models/Team'
-import {Demo} from '../models/Demo'
-import {Highlight} from '../models/Highlight'
-import {Veto} from '../models/Veto'
-import {HeadToHeadResult} from '../models/HeadToHeadResult'
-import {MapSlug} from '../enums/MapSlug'
-import {MatchStatus} from '../enums/MatchStatus'
-import {hasChild, hasNoChild, percentageToDecimalOdd, popSlashSource} from '../utils/parsing'
-import {HLTVConfig} from '../config'
-import {fetchPage, getMapSlug, getMatchFormat, getMatchPlayer, mapVetoElementToModel, toArray} from '../utils/mappers'
+import { FullMatch } from '../models/FullMatch'
+import { Event } from '../models/Event'
+import { MapResult } from '../models/MapResult'
+import { Player } from '../models/Player'
+import { Stream } from '../models/Stream'
+import { Team } from '../models/Team'
+import { Demo } from '../models/Demo'
+import { Highlight } from '../models/Highlight'
+import { Veto } from '../models/Veto'
+import { HeadToHeadResult } from '../models/HeadToHeadResult'
+import { MapSlug } from '..'
+import { MatchStatus } from '../enums/MatchStatus'
+import { hasChild, popSlashSource } from '../utils/parsing'
+import { HLTVConfig } from '../config'
+import { fetchPage, getMapSlug, getMatchFormat, getMatchPlayer, mapVetoElementToModel, toArray } from '../utils/mappers'
 
-export const getMatch = (config: HLTVConfig) => async ({id}: { id: number }): Promise<FullMatch> => {
-    const $ = await fetchPage(`${config.hltvUrl}/matches/${id}/-`, config.loadPage)
+export const getMatch = (config: HLTVConfig) => async ({ id }: { id: number }): Promise<FullMatch | null> => {
+    const $ = await fetchPage(`${config.hltvUrl}/matches/${id}/${config.strRandom(15)}`, config.loadPage)
+
+    /*if ($('.cf-error-code').length) {
+        console.log(resetCount)
+        return null
+
+        if (!resetCount) {
+            resetCount = 0
+        }
+
+        resetCount++
+
+        return resetCount > 3 ? null : getMatch(id, resetCount)
+    }*/
 
     const title = $('.timeAndEvent .text').text().trim() || undefined
 
     const date = Number($('.timeAndEvent .date').attr('data-unix'))
-
     const preformattedText = $('.preformatted-text').text()!.split('\n')
 
     const format = getMatchFormat(preformattedText[0])
@@ -97,18 +108,14 @@ export const getMatch = (config: HLTVConfig) => async ({id}: { id: number }): Pr
             .map(el => mapVetoElementToModel(el, team1, team2))
     }
 
+    console.log($('.timeAndEvent > .event').text(), $('.timeAndEvent > .event > a').attr('title'), '-', id)
+
     const event: Event = {
-        name: $('.timeAndEvent .event').text(),
-        id: Number(
-            $('.timeAndEvent .event')
-                .children()
-                .first()
-                .attr('href')!
-                .split('/')[2]
-        )
+        name: $('.timeAndEvent > .event').text(),
+        id: $('.timeAndEvent .event').length ? Number($('.timeAndEvent .event').children().first().attr('href')!.split('/')[2]) : undefined
     }
 
-    const odds: OddResult[] = toArray($('tr.provider:not(.hidden)'))
+    /* const odds: OddResult[] = toArray($('tr.provider:not(.hidden)'))
         .filter(hasNoChild('.noOdds'))
         .map(oddElement => {
             let convertOdds =
@@ -175,9 +182,23 @@ export const getMatch = (config: HLTVConfig) => async ({id}: { id: number }): Pr
                 )
             )
         }
-    }
+    }  */
 
     const maps: MapResult[] = toArray($('.mapholder')).map(mapEl => {
+        const mapScores = {}
+
+        if (!mapEl.find('.results').length) {
+            mapScores[team1.id] = 0
+            mapScores[team2.id] = 0
+
+            return {
+                name: getMapSlug(mapEl.find('.mapname').text()),
+                result: undefined,
+                scores: mapScores,
+                statsId: undefined
+            }
+        }
+
         const team1Rounds = Number(mapEl.find('.results-left .results-team-score').text().trim())
         const team2Rounds = Number(mapEl.find('.results-right .results-team-score').text().trim())
 
@@ -201,8 +222,6 @@ export const getMatch = (config: HLTVConfig) => async ({id}: { id: number }): Pr
                 tie = true
             }
         }
-
-        const mapScores = {}
 
         mapScores[team1.id] = team1Rounds
         mapScores[team2.id] = team2Rounds
@@ -288,10 +307,10 @@ export const getMatch = (config: HLTVConfig) => async ({id}: { id: number }): Pr
             const gotvEl = demoEl.find('.left-right-padding')
 
             if (gotvEl.length !== 0) {
-                return {name: gotvEl.text(), link: gotvEl.attr('href')!}
+                return { name: gotvEl.text(), link: gotvEl.attr('href')! }
             }
 
-            return {name: demoEl.find('.spoiler').text(), link: demoEl.attr('data-stream-embed')!}
+            return { name: demoEl.find('.spoiler').text(), link: demoEl.attr('data-stream-embed')! }
         }
     )
 
@@ -345,7 +364,7 @@ export const getMatch = (config: HLTVConfig) => async ({id}: { id: number }): Pr
 
             const result = matchEl.find('.result').text()
 
-            return {date, map, winner, event, result}
+            return { date, map, winner, event, result }
         })
     }
 
@@ -372,7 +391,7 @@ export const getMatch = (config: HLTVConfig) => async ({id}: { id: number }): Pr
     const sockets = hasScorebot
         ? $('#scoreboardElement').attr('data-scorebot-url')!.split(',')
         : []
-    
+
     if (status === MatchStatus.Over) {
         scores[team1.id] = Number($('.team1-gradient > div').text().trim());
         scores[team2.id] = Number($('.team2-gradient > div').text().trim()); //.children().last()
@@ -403,7 +422,7 @@ export const getMatch = (config: HLTVConfig) => async ({id}: { id: number }): Pr
         vetoes,
         highlights,
         demos,
-        odds,
-        oddsCommunity,
+        // odds,
+        // oddsCommunity,
     }
 }

@@ -4,14 +4,14 @@ import { Team } from '../models/Team'
 import { Veto } from '../models/Veto'
 import { Player } from '../models/Player'
 import { Outcome, WeakRoundOutcome } from '../models/RoundOutcome'
-import { MapSlug } from '../enums/MapSlug'
-import { popSlashSource } from '../utils/parsing'
+import { MapSlug } from '..'
+import { popSlashSource } from './parsing'
 import { Agent as HttpsAgent } from 'https'
 import { Agent as HttpAgent } from 'http'
 
 export const defaultLoadPage = (httpAgent: HttpsAgent | HttpAgent | undefined) => (url: string) =>
     new Promise<string>(resolve => {
-        request.get(url, {gzip: true, agent: httpAgent}, (_, __, body) => resolve(body))
+        request.get(url, { gzip: true, agent: httpAgent }, (_, __, body) => resolve(body))
     })
 
 export const fetchPage = async (
@@ -67,14 +67,14 @@ export const getMatchFormat = (formatText: string, onlyNumber: boolean = false):
 
 export const getMatchFormatAndMap = (mapText: string): { map?: MapSlug; format?: string } => {
     if (mapText && !mapText.includes('bo')) {
-        return {map: mapText as MapSlug, format: 'bo1'}
+        return { map: mapText as MapSlug, format: 'bo1' }
     }
 
     if (!mapText) {
         return {}
     }
 
-    return {format: mapText}
+    return { format: mapText }
 }
 
 export const mapRoundElementToModel = (team1Id: number, team2Id: number) => (
