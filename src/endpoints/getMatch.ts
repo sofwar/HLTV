@@ -107,9 +107,7 @@ export const getMatch = (config: HLTVConfig) => async ({ id }: { id: number }): 
             .slice(0, -1)
             .map(el => mapVetoElementToModel(el, team1, team2))
     }
-
-    console.log($('.timeAndEvent > .event').text(), $('.timeAndEvent > .event > a').attr('title'), '-', id)
-
+    
     const event: Event = {
         name: $('.timeAndEvent > .event').text(),
         id: $('.timeAndEvent .event').length ? Number($('.timeAndEvent .event').children().first().attr('href')!.split('/')[2]) : undefined
